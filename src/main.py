@@ -6,8 +6,14 @@
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
+from dotenv import load_dotenv
 from crawler import NaverNewsCrawler
 from kakao_sender import KakaoSender
+
+# .env 파일 로드 (프로젝트 루트 기준)
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 
 def main():
@@ -20,6 +26,7 @@ def main():
     # 환경 변수 로드
     client_id = os.getenv('KAKAO_CLIENT_ID')
     refresh_token = os.getenv('KAKAO_REFRESH_TOKEN')
+    client_secret = os.getenv('KAKAO_CLIENT_SECRET')
     
     if not client_id or not refresh_token:
         print("❌ 오류: 환경 변수가 설정되지 않았습니다.")
@@ -42,7 +49,7 @@ def main():
     
     # 3. 카카오톡 전송
     print("\n📱 카카오톡 메시지 전송 시작...")
-    sender = KakaoSender(client_id, refresh_token)
+    sender = KakaoSender(client_id, refresh_token, client_secret)
     
     if sender.send_message(message):
         print("\n" + "=" * 50)

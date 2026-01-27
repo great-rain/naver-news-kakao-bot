@@ -11,14 +11,16 @@ from typing import Optional
 class KakaoSender:
     """카카오톡 메시지 전송 클래스"""
     
-    def __init__(self, client_id: str, refresh_token: str):
+    def __init__(self, client_id: str, refresh_token: str, client_secret: str = None):
         """
         Args:
             client_id: 카카오 REST API 키
             refresh_token: 카카오 Refresh Token
+            client_secret: 카카오 Client Secret (선택)
         """
         self.client_id = client_id
         self.refresh_token = refresh_token
+        self.client_secret = client_secret  # 이 줄 추가
         self.access_token = None
         self.token_url = "https://kauth.kakao.com/oauth/token"
         self.message_url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
@@ -36,8 +38,24 @@ class KakaoSender:
             'refresh_token': self.refresh_token
         }
         
+        if self.client_secret:
+            data['client_secret'] = self.client_secret
+
         try:
             response = requests.post(self.token_url, data=data)
+            
+            # 에러 상세 정보 출력
+            if response.status_code != 200:
+                print(f"\n🔍 에러 상세 정보:")
+                print(f"   Status Code: {response.status_code}")
+                print(f"   응답 내용: {response.text}")
+                try:
+                    error_info = response.json()
+                    print(f"   에러 코드: {error_info.get('error', 'Unknown')}")
+                    print(f"   에러 설명: {error_info.get('error_description', 'No description')}")
+                except:
+                    pass
+            
             response.raise_for_status()
             
             tokens = response.json()
